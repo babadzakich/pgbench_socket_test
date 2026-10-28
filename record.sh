@@ -4,7 +4,7 @@
 set -euo pipefail
 
 DIR=$(cd "$(dirname "$0")" && pwd)
-BIN=${BIN:-$HOME/pg17_install/bin}
+PGBIN=${PGBIN:-}                        # directory with pgbench; empty = take it from PATH
 PORT=5432
 PG_SOCK=$DIR/pgsock/.s.PGSQL.$PORT     # real server socket
 PROXY_DIR=$DIR/proxy                   # pgbench connects here
@@ -22,7 +22,7 @@ trap 'kill $SOCAT_PID 2>/dev/null; rm -f "$PROXY_DIR/.s.PGSQL.$PORT"' EXIT
 sleep 0.5
 
 if [[ $# -eq 0 ]]; then set -- -c 8 -j 8 -T 10 -M prepared; fi
-"$BIN/pgbench" -h "$PROXY_DIR" -p "$PORT" "$@" bench | tee "$TRACE/pgbench.txt"
+"${PGBIN:+$PGBIN/}pgbench" -h "$PROXY_DIR" -p "$PORT" "$@" bench | tee "$TRACE/pgbench.txt"
 
 sleep 0.5
 echo "trace written to $TRACE:"
